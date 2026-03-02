@@ -13,32 +13,25 @@ export class AppError extends Error {
 }
 
 export const errorHandler = (
-  err: Error | AppError,
-  req: Request,
+  err: AppError,
+  _req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
-  if (err instanceof AppError) {
-    logger.error('Operational error', {
-      statusCode: err.statusCode,
-      message: err.message,
-      path: req.path
-    });
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Internal Server Error';
 
-    return res.status(err.statusCode).json({
-      status: 'error',
-      message: err.message
-    });
-  }
-
-  logger.error('Unexpected error', {
-    error: err.message,
+  logger.error('Error occurred', {
+    statusCode,
+    message,
     stack: err.stack,
-    path: req.path
   });
 
-  return res.status(500).json({
-    status: 'error',
-    message: 'Internal server error'
+  res.status(statusCode).json({
+    error: {
+      message,
+      statusCode,
+      ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
+    },
   });
 };
