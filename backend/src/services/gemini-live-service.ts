@@ -14,22 +14,26 @@ interface Session {
 }
 
 export class GeminiLiveService {
-  private genAI: GoogleGenerativeAI;
+  private genAI: GoogleGenerativeAI | null = null;
+  private model: any | null = null;
+  private apiKey: string;
   private firestoreService: FirestoreService;
   private redisService: RedisService;
-  private activeSessions: Map<string, any>;
 
   constructor() {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      throw new Error('GEMINI_API_KEY is not configured');
+    this.apiKey = process.env.GEMINI_API_KEY || '';
+    
+    if (!this.apiKey) {
+      logger.warn('GEMINI_API_KEY not configured - service will run in demo mode');
+    } else {
+      this.genAI = new GoogleGenerativeAI(this.apiKey);
     }
 
-    this.genAI = new GoogleGenerativeAI(apiKey);
     this.firestoreService = new FirestoreService();
     this.redisService = new RedisService();
-    this.activeSessions = new Map();
   }
+
+  private activeSessions = new Map();
 
   async startSession(userId: string, skill: string, language: string): Promise<Session> {
     try {
@@ -40,32 +44,30 @@ export class GeminiLiveService {
         userId,
         skill,
         language,
+        status: 'active',
         startedAt: new Date(),
-        status: 'active'
       };
 
+      // Only initialize model if API key is available
+      if (this.genAI) {
+        const systemPrompt = this.buildSystemPrompt(skill, language);
+        this.model = this.genAI.getGenerativeModel({
+          model: 'gemini-2.0-flash-exp',
+          systemInstruction: systemPrompt,
+        });
+      }
+
+      // Save to Firestore
       await this.firestoreService.saveSession(session);
-      await this.redisService.cacheSession(sessionId, session);
 
-      const systemPrompt = this.buildSystemPrompt(skill, language);
-      
-      const model = this.genAI.getGenerativeModel({
-        model: 'gemini-2.0-flash-exp',
-        systemInstruction: systemPrompt
-      });
+      // Cache in Redis
+      await this.redisService.cacheSession(session.id, session);
 
-      this.activeSessions.set(sessionId, {
-        model,
-        session,
-        history: []
-      });
-
-      logger.info('Gemini Live session initialized', { sessionId, skill, language });
-
+      logger.info('Gemini Live session created', { sessionId: session.id, userId, skill });
       return session;
     } catch (error) {
-      logger.error('Failed to start Gemini Live session', { error, userId, skill });
-      throw new AppError(500, 'Failed to start session');
+      logger.error('Failed to create session', { error });
+      throw new AppError(500, 'Failed to create session');
     }
   }
 
@@ -105,6 +107,56 @@ export class GeminiLiveService {
     } catch (error) {
       logger.error('Failed to get session status', { error, sessionId });
       throw error;
+    }
+  }
+
+  async processVideoFrame(sessionId: string, frameData: Buffer): Promise<string> {
+    if (!this.genAI || !this.model) {
+      logger.warn('Demo mode: Returning mock response');
+      return 'Good technique! Keep the knife at a 15-degree angle for better control.';
+    }
+
+    try {
+      const prompt = {
+        text: 'Analyze this video frame and provide feedback on the technique shown.',
+        inlineData: {
+          data: frameData.toString('base64'),
+          mimeType: 'image/jpeg',
+        },
+      };
+
+      const result = await this.model.generateContent([prompt]);
+      const response = result.response.text();
+
+      return response;
+    } catch (error) {
+      logger.error('Failed to process video frame', { error, sessionId });
+      throw new AppError(500, 'Failed to process video frame');
+    }
+  }
+
+  async processAudioChunk(sessionId: string, audioData: Buffer): Promise<string> {
+    if (!this.genAI || !this.model) {
+      logger.warn('Demo mode: Returning mock response');
+      return 'I hear you! Please continue with what you were doing.';
+    }
+
+    try {
+      const prompt = {
+        text: 'The user is speaking. Listen and respond naturally.',
+        inlineData: {
+          data: audioData.toString('base64'),
+          mimeType: 'audio/wav',
+        },
+      };
+
+      const result = await this.model.generateContent([prompt]);
+      const response = result.response.text();
+
+      return response;
+    } catch (error) {
+      logger.error('Failed to process audio chunk', { error, sessionId });
+      throw new AppError(500, 'Failed to process audio chunk');
     }
   }
 
