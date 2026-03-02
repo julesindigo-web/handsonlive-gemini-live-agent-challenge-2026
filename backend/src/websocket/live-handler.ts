@@ -3,6 +3,8 @@ import { logger } from '../utils/logger';
 import { GeminiLiveAgent } from '../agents/gemini-live-agent';
 import { FirestoreService } from '../services/firestore-service';
 import { RedisService } from '../services/redis-service';
+import { RAGService } from '../services/rag-service';
+import { AgentMemoryService } from '../services/agent-memory-service';
 
 export interface LiveSession {
   sessionId: string;
@@ -19,20 +21,25 @@ export class LiveHandler {
   private sessions: Map<string, LiveSession> = new Map();
   private firestoreService: FirestoreService;
   private redisService: RedisService;
+  private ragService: RAGService;
+  private memoryService: AgentMemoryService;
 
   constructor() {
     this.firestoreService = new FirestoreService();
     this.redisService = new RedisService();
+    this.ragService = new RAGService();
+    this.memoryService = new AgentMemoryService(this.firestoreService);
   }
 
   async handleConnection(ws: WebSocket, userId: string, skill: string, language: string) {
     const sessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-    const agent = new GeminiLiveAgent({
-      apiKey: process.env.GEMINI_API_KEY!,
-      model: 'gemini-2.0-flash-exp',
-      systemInstruction: '',
-    });
+    const agent = new GeminiLiveAgent(
+      skill,
+      language,
+      this.ragService,
+      this.memoryService
+    );
 
     const session: LiveSession = {
       sessionId,

@@ -89,4 +89,18 @@ export class FirestoreService {
       throw error;
     }
   }
+
+  async getUserSessions(userId: string): Promise<any[]> {
+    try {
+      const snapshot = await this.db
+        .collection('sessions')
+        .where('userId', '==', userId)
+        .get();
+      
+      return snapshot.docs.map((doc) => doc.data());
+    } catch (error) {
+      logger.error('Failed to get user sessions', { error, userId });
+      throw error;
+    }
+  }
 }
