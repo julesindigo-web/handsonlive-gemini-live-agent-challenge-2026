@@ -5,6 +5,7 @@ import { FirestoreService } from '../services/firestore-service';
 import { RedisService } from '../services/redis-service';
 import { RAGService } from '../services/rag-service';
 import { AgentMemoryService } from '../services/agent-memory-service';
+import { AROverlayService } from '../services/ar-overlay-service';
 
 export interface LiveSession {
   sessionId: string;
@@ -23,12 +24,14 @@ export class LiveHandler {
   private redisService: RedisService;
   private ragService: RAGService;
   private memoryService: AgentMemoryService;
+  private arOverlayService: AROverlayService;
 
   constructor() {
     this.firestoreService = new FirestoreService();
     this.redisService = new RedisService();
     this.ragService = new RAGService();
     this.memoryService = new AgentMemoryService(this.firestoreService);
+    this.arOverlayService = new AROverlayService();
   }
 
   async handleConnection(ws: WebSocket, userId: string, skill: string, language: string) {
@@ -40,6 +43,9 @@ export class LiveHandler {
       this.ragService,
       this.memoryService
     );
+
+    // Initialize AR overlays for this session
+    const visualGuidance = await this.arOverlayService.generateVisualGuidance(skill, 'initial', language);
 
     const session: LiveSession = {
       sessionId,
@@ -74,8 +80,13 @@ export class LiveHandler {
 
     // Send session created message
     ws.send(JSON.stringify({
-      type: 'session_created',
-      data: { sessionId, skill, language },
+      type: 'session_started',
+      data: {
+        sessionId,
+        skill,
+        language,
+        visualGuidance: visualGuidance,
+      },
     }));
 
     // Setup message handler
