@@ -1,21 +1,38 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Video, Mic, MicOff, VideoOff, Play, StopCircle } from 'lucide-react';
+import { useMediaStream } from '@/hooks/use-media-stream';
+import { useWebSocket } from '@/hooks/use-websocket';
 
 export default function LearnPage() {
-  const [isStreamActive, setIsStreamActive] = useState(false);
   const [selectedSkill, setSelectedSkill] = useState('cooking');
   const [language, setLanguage] = useState('id');
-  const [isAudioEnabled, setIsAudioEnabled] = useState(true);
-  const [isVideoEnabled, setIsVideoEnabled] = useState(true);
-  const [agentResponse, setAgentResponse] = useState('');
   const [sessionId, setSessionId] = useState('');
 
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const {
+    stream,
+    videoRef,
+    error: mediaError,
+    isVideoEnabled,
+    isAudioEnabled,
+    startCamera,
+    stopCamera,
+    toggleVideo,
+    toggleAudio,
+    captureVideoFrame,
+  } = useMediaStream();
+
+  const {
+    isConnected: isWsConnected,
+    agentResponse,
+    error: wsError,
+    connect: connectWs,
+    disconnect: disconnectWs,
+    sendVideoFrame,
+  } = useWebSocket('ws://localhost:3001');
 
   const skills = [
     { id: 'cooking', name: 'Cooking', description: 'Learn to cook Nasi Goreng and other dishes' },
@@ -30,101 +47,42 @@ export default function LearnPage() {
     { code: 'es', name: 'Spanish' },
   ];
 
-  const startCamera = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-
-      mediaStreamRef.current = stream;
-
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-
-      setIsStreamActive(true);
-      console.log('Camera started successfully');
-    } catch (error) {
-      console.error('Error starting camera:', error);
-      alert('Failed to access camera and microphone. Please ensure permissions are granted.');
-    }
+  const handleStartCamera = async () => {
+    await startCamera();
   };
 
-  const stopCamera = () => {
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
-    }
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-
-    setIsStreamActive(false);
-    console.log('Camera stopped');
+  const handleStopCamera = () => {
+    stopCamera();
+    disconnectWs();
+    setSessionId('');
   };
 
-  const toggleAudio = () => {
-    if (mediaStreamRef.current) {
-      const audioTracks = mediaStreamRef.current.getAudioTracks();
-      audioTracks.forEach((track) => {
-        track.enabled = !isAudioEnabled;
-      });
-      setIsAudioEnabled(!isAudioEnabled);
-    }
-  };
-
-  const toggleVideo = () => {
-    if (mediaStreamRef.current) {
-      const videoTracks = mediaStreamRef.current.getVideoTracks();
-      videoTracks.forEach((track) => {
-        track.enabled = !isVideoEnabled;
-      });
-      setIsVideoEnabled(!isVideoEnabled);
-    }
-  };
-
-  const startSession = async () => {
-    try {
-      const response = await fetch('/api/gemini-live/session/start', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: 'demo-user',
-          skill: selectedSkill,
-          language,
-        }),
-      });
-
-      const data = await response.json();
-      setSessionId(data.data.id);
-      console.log('Session started:', data.data);
-    } catch (error) {
-      console.error('Error starting session:', error);
-    }
-  };
-
-  const stopSession = async () => {
-    if (!sessionId) return;
+  const handleStartSession = async () => {
+    if (!stream) return;
 
     try {
-      await fetch(`/api/gemini-live/session/${sessionId}/stop`, {
-        method: 'POST',
-      });
-      console.log('Session stopped');
+      await connectWs('demo-user', selectedSkill, language);
+      setSessionId('session_' + Date.now());
+
+      // Start sending video frames
+      const interval = setInterval(() => {
+        const frameData = captureVideoFrame();
+        if (frameData) {
+          sendVideoFrame(frameData);
+        }
+      }, 100); // Send frame every 100ms
+
+      // Clear interval when session stops
+      return () => clearInterval(interval);
     } catch (error) {
-      console.error('Error stopping session:', error);
+      console.error('Failed to start session:', error);
     }
   };
 
-  useEffect(() => {
-    return () => {
-      stopCamera();
-    };
-  }, []);
+  const handleStopSession = () => {
+    disconnectWs();
+    setSessionId('');
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white dark:from-gray-900 dark:to-gray-800">
@@ -148,20 +106,26 @@ export default function LearnPage() {
                     muted
                     className="w-full h-full object-cover"
                   />
-                  {!isStreamActive && (
+                  {!stream && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <p className="text-white text-lg">Camera not active</p>
                     </div>
                   )}
                 </div>
 
+                {mediaError && (
+                  <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 mb-4">
+                    <p className="text-red-600 dark:text-red-400 text-sm">{mediaError}</p>
+                  </div>
+                )}
+
                 <div className="flex gap-2 mb-4">
                   <Button
-                    onClick={() => (isStreamActive ? stopCamera() : startCamera())}
-                    variant={isStreamActive ? 'destructive' : 'default'}
+                    onClick={() => (stream ? handleStopCamera() : handleStartCamera())}
+                    variant={stream ? 'destructive' : 'default'}
                     className="flex-1"
                   >
-                    {isStreamActive ? (
+                    {stream ? (
                       <>
                         <StopCircle className="w-4 h-4 mr-2" />
                         Stop Camera
@@ -177,7 +141,7 @@ export default function LearnPage() {
                   <Button
                     onClick={toggleVideo}
                     variant={isVideoEnabled ? 'default' : 'outline'}
-                    disabled={!isStreamActive}
+                    disabled={!stream}
                   >
                     {isVideoEnabled ? (
                       <Video className="w-4 h-4" />
@@ -189,7 +153,7 @@ export default function LearnPage() {
                   <Button
                     onClick={toggleAudio}
                     variant={isAudioEnabled ? 'default' : 'outline'}
-                    disabled={!isStreamActive}
+                    disabled={!stream}
                   >
                     {isAudioEnabled ? (
                       <Mic className="w-4 h-4" />
@@ -201,15 +165,15 @@ export default function LearnPage() {
 
                 <div className="flex gap-2">
                   <Button
-                    onClick={startSession}
-                    disabled={!isStreamActive || !!sessionId}
+                    onClick={handleStartSession}
+                    disabled={!stream || !!sessionId}
                     className="flex-1"
                   >
                     Start AI Coaching
                   </Button>
 
                   <Button
-                    onClick={stopSession}
+                    onClick={handleStopSession}
                     disabled={!sessionId}
                     variant="destructive"
                     className="flex-1"
@@ -217,6 +181,20 @@ export default function LearnPage() {
                     Stop AI Coaching
                   </Button>
                 </div>
+
+                {isWsConnected && (
+                  <div className="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                    <p className="text-green-600 dark:text-green-400 text-sm">
+                      ✓ Connected to AI Coach
+                    </p>
+                  </div>
+                )}
+
+                {wsError && (
+                  <div className="mt-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3">
+                    <p className="text-red-600 dark:text-red-400 text-sm">{wsError}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -304,6 +282,9 @@ export default function LearnPage() {
                     </p>
                     <p className="text-sm mt-2">
                       <strong>Language:</strong> {languages.find((l) => l.code === language)?.name}
+                    </p>
+                    <p className="text-sm mt-2">
+                      <strong>Status:</strong> {isWsConnected ? 'Connected' : 'Disconnected'}
                     </p>
                   </CardContent>
                 </Card>
