@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Video, Mic, MicOff, VideoOff, Play, StopCircle } from 'lucide-react';
 import { useMediaStream } from '@/hooks/use-media-stream';
 import { useWebSocket } from '@/hooks/use-websocket';
+import { useAudioRecorder } from '@/hooks/use-audio-recorder';
 
 export default function LearnPage() {
   const [selectedSkill, setSelectedSkill] = useState('cooking');
@@ -32,7 +33,16 @@ export default function LearnPage() {
     connect: connectWs,
     disconnect: disconnectWs,
     sendVideoFrame,
+    sendAudioChunk,
   } = useWebSocket('ws://localhost:3001');
+
+  const {
+    isRecording,
+    startRecording,
+    stopRecording,
+    getLatestChunk,
+    clearChunks,
+  } = useAudioRecorder();
 
   const skills = [
     { id: 'cooking', name: 'Cooking', description: 'Learn to cook Nasi Goreng and other dishes' },
@@ -65,15 +75,29 @@ export default function LearnPage() {
       setSessionId('session_' + Date.now());
 
       // Start sending video frames
-      const interval = setInterval(() => {
+      const videoInterval = setInterval(() => {
         const frameData = captureVideoFrame();
         if (frameData) {
           sendVideoFrame(frameData);
         }
       }, 100); // Send frame every 100ms
 
-      // Clear interval when session stops
-      return () => clearInterval(interval);
+      // Start audio recording and streaming
+      await startRecording();
+      const audioInterval = setInterval(async () => {
+        const audioData = await getLatestChunk();
+        if (audioData) {
+          sendAudioChunk(audioData);
+          clearChunks();
+        }
+      }, 500); // Send audio every 500ms
+
+      // Cleanup function
+      return () => {
+        clearInterval(videoInterval);
+        clearInterval(audioInterval);
+        stopRecording();
+      };
     } catch (error) {
       console.error('Failed to start session:', error);
     }
@@ -81,6 +105,8 @@ export default function LearnPage() {
 
   const handleStopSession = () => {
     disconnectWs();
+    stopRecording();
+    clearChunks();
     setSessionId('');
   };
 
@@ -186,6 +212,7 @@ export default function LearnPage() {
                   <div className="mt-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-3">
                     <p className="text-green-600 dark:text-green-400 text-sm">
                       ✓ Connected to AI Coach
+                      {isRecording && ' (Recording audio...)'}
                     </p>
                   </div>
                 )}
