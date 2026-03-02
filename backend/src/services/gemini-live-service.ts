@@ -1,4 +1,4 @@
-import { GoogleGenerativeAI } from '@google/genai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../utils/logger';
 import { AppError } from '../utils/error-handler';
 import { FirestoreService } from './firestore-service';

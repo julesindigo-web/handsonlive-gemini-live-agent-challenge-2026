@@ -14,8 +14,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@google/genai": "^1.0.0",
-    "@google-cloud/vertexai": "^2.0.0",
+    "@google/generative-ai": "^0.21.0",
+    "@google-cloud/aiplatform": "^3.0.0",
     "@google-cloud/firestore": "^7.0.0",
     "@google-cloud/storage": "^7.0.0",
     "@google-cloud/secret-manager": "^5.0.0",
