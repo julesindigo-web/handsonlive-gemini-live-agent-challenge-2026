@@ -1,30 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Video, Mic, MicOff, VideoOff, Play, StopCircle, Sparkles, Activity, Settings, MessageSquare, Radio, Wifi } from 'lucide-react';
+import { Video, Mic, MicOff, VideoOff, Play, StopCircle, Sparkles, MessageSquare, ArrowLeft, ChefHat, Wrench, Leaf, Palette } from 'lucide-react';
 import { useMediaStream } from '@/hooks/use-media-stream';
 import { useWebSocket } from '@/hooks/use-websocket';
 import { useAudioRecorder } from '@/hooks/use-audio-recorder';
 import { motion, AnimatePresence } from 'framer-motion';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }
-  }
-};
 
 export default function LearnPage() {
   const [mounted, setMounted] = useState(false);
@@ -68,10 +52,10 @@ export default function LearnPage() {
   } = useAudioRecorder();
 
   const skills = [
-    { id: 'cooking', name: 'Cooking', emoji: '🍳', description: 'Master culinary arts', color: 'from-orange-400 to-red-500', bg: 'bg-orange-500/20' },
-    { id: 'repair', name: 'Repair', emoji: '🔧', description: 'Electronics & machinery', color: 'from-blue-400 to-indigo-500', bg: 'bg-blue-500/20' },
-    { id: 'farming', name: 'Farming', emoji: '🌱', description: 'Hydroponics & agriculture', color: 'from-green-400 to-emerald-500', bg: 'bg-green-500/20' },
-    { id: 'crafts', name: 'Crafts', emoji: '🎨', description: 'Batik, woodwork & more', color: 'from-purple-400 to-pink-500', bg: 'bg-purple-500/20' },
+    { id: 'cooking', name: 'Cooking', icon: ChefHat, description: 'Master culinary arts', color: 'bg-orange-500', lightColor: 'bg-orange-50 text-orange-600' },
+    { id: 'repair', name: 'Repair', icon: Wrench, description: 'Electronics & machinery', color: 'bg-blue-500', lightColor: 'bg-blue-50 text-blue-600' },
+    { id: 'farming', name: 'Farming', icon: Leaf, description: 'Hydroponics & agriculture', color: 'bg-green-500', lightColor: 'bg-green-50 text-green-600' },
+    { id: 'crafts', name: 'Crafts', icon: Palette, description: 'Batik, woodwork & more', color: 'bg-purple-500', lightColor: 'bg-purple-50 text-purple-600' },
   ];
 
   const languages = [
@@ -130,103 +114,88 @@ export default function LearnPage() {
     setSessionId('');
   };
 
+  if (!mounted) return null;
+
   return (
-    <div className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden relative">
-      {/* Animated Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/30 via-[#0a0a0f] to-[#0a0a0f]" />
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-l from-violet-600/10 to-transparent rounded-full blur-[100px]" />
-        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-gradient-to-r from-cyan-600/10 to-transparent rounded-full blur-[80px]" />
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:80px_80px]" />
-      </div>
-
-      {/* Floating Orbs */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {[...Array(3)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-48 h-48 rounded-full"
-            style={{
-              background: `radial-gradient(circle, rgba(${99 + i * 30},${102 + i * 20},${241 - i * 20},0.15) 0%, transparent 70%)`,
-              right: `${10 + i * 15}%`,
-              top: `${15 + i * 20}%`,
-            }}
-            animate={{
-              y: [0, -20, 0],
-              scale: [1, 1.05, 1],
-            }}
-            transition={{
-              duration: 6 + i * 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.8
-            }}
-          />
-        ))}
-      </div>
-
-      <div className="container mx-auto px-4 py-8 relative z-10">
-        <motion.div 
-          className="max-w-7xl mx-auto"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          {/* Header */}
-          <motion.div variants={itemVariants} className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-4">
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <Sparkles className="w-10 h-10 text-amber-400" />
-              </motion.div>
-              <div>
-                <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
-                  Learn with HandsOnLive
-                </h1>
-                <p className="text-white/50 mt-1">Real-time AI-powered skill coaching</p>
+    <main className="min-h-screen bg-slate-50">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/" className="flex items-center gap-2 text-slate-600 hover:text-slate-900 transition-colors">
+              <ArrowLeft className="w-5 h-5" />
+              <span className="text-sm font-medium">Back</span>
+            </Link>
+            <div className="h-6 w-px bg-slate-200" />
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-white" />
               </div>
+              <span className="font-bold text-slate-900 text-lg">HandsOnLive</span>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.03] backdrop-blur-xl border border-white/10">
-              <div className={`w-2 h-2 rounded-full ${isWsConnected ? 'bg-green-400 animate-pulse' : 'bg-white/30'}`} />
-              <span className="text-sm text-white/70">
+          </div>
+          <div className="flex items-center gap-3">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${isWsConnected ? 'bg-green-50 border-green-200' : 'bg-slate-100 border-slate-200'}`}>
+              <div className={`w-2 h-2 rounded-full ${isWsConnected ? 'bg-green-500 animate-pulse' : 'bg-slate-400'}`} />
+              <span className={`text-sm font-medium ${isWsConnected ? 'text-green-700' : 'text-slate-600'}`}>
                 {isWsConnected ? 'AI Connected' : 'Ready'}
               </span>
             </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <div className="pt-24 pb-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
+            <h1 className="text-3xl font-bold text-slate-900 mb-2">Learning Session</h1>
+            <p className="text-slate-600">Practice your skills with real-time AI feedback</p>
           </motion.div>
 
-          <div className="grid lg:grid-cols-5 gap-6">
+          <div className="grid lg:grid-cols-3 gap-6">
             {/* Left Panel: Video Stream */}
-            <motion.div variants={itemVariants} className="lg:col-span-3">
-              <Card className="bg-white/[0.03] backdrop-blur-xl border-white/10 overflow-hidden shadow-2xl shadow-black/50">
-                <CardHeader className="border-b border-white/10 pb-4">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="lg:col-span-2"
+            >
+              <Card className="overflow-hidden border-slate-200 shadow-sm">
+                <CardHeader className="border-b border-slate-100 bg-white pb-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
-                        <Video className="w-5 h-5 text-white" />
+                      <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+                        <Video className="w-5 h-5 text-indigo-600" />
                       </div>
                       <div>
-                        <CardTitle className="text-white text-lg">Live Video Stream</CardTitle>
-                        <CardDescription className="text-white/50">
+                        <CardTitle className="text-slate-900 text-lg">Video Stream</CardTitle>
+                        <CardDescription className="text-slate-500">
                           Your camera feed with AI coaching
                         </CardDescription>
                       </div>
                     </div>
                     {isWsConnected && (
-                      <motion.div 
+                      <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/20 border border-green-500/30"
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 border border-green-200"
                       >
-                        <Radio className="w-4 h-4 text-green-400 animate-pulse" />
-                        <span className="text-green-400 text-sm font-medium">LIVE</span>
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                        <span className="text-green-700 text-sm font-medium">LIVE</span>
                       </motion.div>
                     )}
                   </div>
                 </CardHeader>
                 <CardContent className="p-6">
-                  <div className="aspect-video bg-black rounded-xl overflow-hidden mb-5 relative border border-white/10 shadow-inner">
+                  {/* Video Player */}
+                  <div className="aspect-video bg-slate-900 rounded-xl overflow-hidden mb-6 relative">
                     <video
                       ref={videoRef}
                       autoPlay
@@ -236,48 +205,44 @@ export default function LearnPage() {
                     />
                     <AnimatePresence>
                       {!stream && (
-                        <motion.div 
+                        <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           exit={{ opacity: 0 }}
-                          className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+                          className="absolute inset-0 flex items-center justify-center bg-slate-800"
                         >
                           <div className="text-center">
-                            <motion.div
-                              animate={{ y: [0, -10, 0] }}
-                              transition={{ duration: 2, repeat: Infinity }}
-                            >
-                              <VideoOff className="w-20 h-20 text-white/30 mx-auto mb-4" />
-                            </motion.div>
-                            <p className="text-white/50 text-lg font-medium">Camera not active</p>
-                            <p className="text-white/30 text-sm mt-2">Click "Start Camera" to begin</p>
+                            <VideoOff className="w-16 h-16 text-slate-500 mx-auto mb-4" />
+                            <p className="text-slate-400 font-medium">Camera not active</p>
+                            <p className="text-slate-500 text-sm mt-1">Click "Start Camera" to begin</p>
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
-                    
+
                     {isWsConnected && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
-                        className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-md border border-white/20"
+                        className="absolute top-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur text-white"
                       >
-                        <Wifi className="w-4 h-4 text-green-400" />
-                        <span className="text-green-400 text-xs font-medium">{isRecording ? 'Recording Audio' : 'Connected'}</span>
+                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                        <span className="text-xs font-medium">{isRecording ? 'Recording' : 'Connected'}</span>
                       </motion.div>
                     )}
                   </div>
 
+                  {/* Error Messages */}
                   <AnimatePresence>
                     {mediaError && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, y: -10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        className="bg-red-500/10 backdrop-blur-sm border border-red-500/30 rounded-lg p-4 mb-5"
+                        className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6"
                       >
-                        <p className="text-red-400 text-sm flex items-center gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
+                        <p className="text-red-600 text-sm flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-red-500" />
                           {mediaError}
                         </p>
                       </motion.div>
@@ -289,10 +254,10 @@ export default function LearnPage() {
                     <Button
                       onClick={() => (stream ? handleStopCamera() : handleStartCamera())}
                       variant={stream ? 'destructive' : 'default'}
-                      className={`flex-1 py-6 text-base font-medium transition-all ${
-                        stream 
-                          ? 'bg-red-500/20 hover:bg-red-500/30 text-red-400 border-red-500/30' 
-                          : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 border-0 shadow-lg shadow-indigo-500/25'
+                      className={`flex-1 py-6 text-base font-medium ${
+                        stream
+                          ? 'bg-red-50 hover:bg-red-100 text-red-600 border-red-200'
+                          : 'bg-indigo-600 hover:bg-indigo-700 text-white'
                       }`}
                     >
                       {stream ? (
@@ -312,8 +277,8 @@ export default function LearnPage() {
                       onClick={toggleVideo}
                       variant="outline"
                       disabled={!stream}
-                      className={`px-4 py-6 border-white/20 backdrop-blur-sm transition-all ${
-                        isVideoEnabled ? 'bg-white/10 text-white' : 'bg-white/5 text-white/50'
+                      className={`px-4 py-6 border-slate-300 ${
+                        isVideoEnabled ? 'bg-slate-100 text-slate-900' : 'bg-white text-slate-400'
                       }`}
                     >
                       {isVideoEnabled ? <Video className="w-5 h-5" /> : <VideoOff className="w-5 h-5" />}
@@ -323,8 +288,8 @@ export default function LearnPage() {
                       onClick={toggleAudio}
                       variant="outline"
                       disabled={!stream}
-                      className={`px-4 py-6 border-white/20 backdrop-blur-sm transition-all ${
-                        isAudioEnabled ? 'bg-white/10 text-white' : 'bg-white/5 text-white/50'
+                      className={`px-4 py-6 border-slate-300 ${
+                        isAudioEnabled ? 'bg-slate-100 text-slate-900' : 'bg-white text-slate-400'
                       }`}
                     >
                       {isAudioEnabled ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
@@ -335,7 +300,7 @@ export default function LearnPage() {
                     <Button
                       onClick={handleStartSession}
                       disabled={!stream || !!sessionId}
-                      className="flex-1 py-6 text-base font-medium bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 border-0 shadow-lg shadow-emerald-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                      className="flex-1 py-6 text-base font-medium bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Sparkles className="w-5 h-5 mr-2" />
                       Start AI Coaching
@@ -344,7 +309,8 @@ export default function LearnPage() {
                     <Button
                       onClick={handleStopSession}
                       disabled={!sessionId}
-                      className="flex-1 py-6 text-base font-medium bg-white/5 hover:bg-white/10 border border-white/20 text-white/70 disabled:opacity-30 transition-all"
+                      variant="outline"
+                      className="flex-1 py-6 text-base font-medium border-slate-300 text-slate-700 disabled:opacity-50"
                     >
                       <StopCircle className="w-5 h-5 mr-2" />
                       Stop Session
@@ -353,13 +319,13 @@ export default function LearnPage() {
 
                   <AnimatePresence>
                     {wsError && (
-                      <motion.div 
+                      <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0 }}
-                        className="mt-4 bg-red-500/10 backdrop-blur-sm border border-red-500/30 rounded-lg p-4"
+                        className="mt-4 bg-red-50 border border-red-200 rounded-lg p-4"
                       >
-                        <p className="text-red-400 text-sm">{wsError}</p>
+                        <p className="text-red-600 text-sm">{wsError}</p>
                       </motion.div>
                     )}
                   </AnimatePresence>
@@ -368,49 +334,57 @@ export default function LearnPage() {
             </motion.div>
 
             {/* Right Panel: Controls & Feedback */}
-            <motion.div variants={itemVariants} className="lg:col-span-2 space-y-5">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="space-y-6"
+            >
               {/* Skill Selection */}
-              <Card className="bg-white/[0.03] backdrop-blur-xl border-white/10">
+              <Card className="border-slate-200 shadow-sm">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-                      <Settings className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-amber-50 rounded-lg flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-amber-600" />
                     </div>
                     <div>
-                      <CardTitle className="text-white text-base">Select Skill</CardTitle>
-                      <CardDescription className="text-white/50 text-xs">Choose what to learn</CardDescription>
+                      <CardTitle className="text-slate-900 text-base">Select Skill</CardTitle>
+                      <CardDescription className="text-slate-500 text-xs">Choose what to learn</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-2">
-                    {skills.map((skill) => (
-                      <motion.button
-                        key={skill.id}
-                        onClick={() => setSelectedSkill(skill.id)}
-                        disabled={!!sessionId}
-                        whileHover={{ scale: sessionId ? 1 : 1.02 }}
-                        whileTap={{ scale: sessionId ? 1 : 0.98 }}
-                        className={`p-3 rounded-xl border transition-all text-left ${
-                          selectedSkill === skill.id
-                            ? `${skill.bg} border-white/30`
-                            : 'bg-white/[0.02] border-white/10 hover:border-white/20 hover:bg-white/[0.04]'
-                        } ${sessionId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                      >
-                        <div className="text-2xl mb-1">{skill.emoji}</div>
-                        <div className="font-semibold text-white text-sm">{skill.name}</div>
-                        <div className="text-xs text-white/40 mt-0.5">{skill.description}</div>
-                      </motion.button>
-                    ))}
+                    {skills.map((skill) => {
+                      const Icon = skill.icon;
+                      return (
+                        <motion.button
+                          key={skill.id}
+                          onClick={() => setSelectedSkill(skill.id)}
+                          disabled={!!sessionId}
+                          whileHover={{ scale: sessionId ? 1 : 1.02 }}
+                          whileTap={{ scale: sessionId ? 1 : 0.98 }}
+                          className={`p-3 rounded-xl border transition-all text-left ${
+                            selectedSkill === skill.id
+                              ? `${skill.lightColor} border-current`
+                              : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+                          } ${sessionId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                          <Icon className="w-5 h-5 mb-2" />
+                          <div className="font-semibold text-sm">{skill.name}</div>
+                          <div className="text-xs opacity-70 mt-0.5">{skill.description}</div>
+                        </motion.button>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
 
               {/* Language Selection */}
-              <Card className="bg-white/[0.03] backdrop-blur-xl border-white/10">
+              <Card className="border-slate-200 shadow-sm">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-white text-base">Language</CardTitle>
-                  <CardDescription className="text-white/50 text-xs">Select preferred language</CardDescription>
+                  <CardTitle className="text-slate-900 text-base">Language</CardTitle>
+                  <CardDescription className="text-slate-500 text-xs">Select preferred language</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-2">
@@ -423,12 +397,12 @@ export default function LearnPage() {
                         whileTap={{ scale: sessionId ? 1 : 0.95 }}
                         className={`p-3 rounded-xl border transition-all text-center ${
                           language === lang.code
-                            ? 'bg-white/10 border-white/30'
-                            : 'bg-white/[0.02] border-white/10 hover:border-white/20 hover:bg-white/[0.04]'
+                            ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                            : 'bg-slate-50 border-slate-200 hover:border-slate-300'
                         } ${sessionId ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                       >
                         <div className="text-2xl mb-1">{lang.flag}</div>
-                        <div className="text-xs text-white/70">{lang.name}</div>
+                        <div className="text-xs">{lang.name}</div>
                       </motion.button>
                     ))}
                   </div>
@@ -436,35 +410,35 @@ export default function LearnPage() {
               </Card>
 
               {/* AI Feedback */}
-              <Card className="bg-white/[0.03] backdrop-blur-xl border-white/10">
+              <Card className="border-slate-200 shadow-sm">
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-                      <MessageSquare className="w-4 h-4 text-white" />
+                    <div className="w-8 h-8 bg-violet-50 rounded-lg flex items-center justify-center">
+                      <MessageSquare className="w-4 h-4 text-violet-600" />
                     </div>
                     <div>
-                      <CardTitle className="text-white text-base">AI Feedback</CardTitle>
-                      <CardDescription className="text-white/50 text-xs">Real-time guidance</CardDescription>
+                      <CardTitle className="text-slate-900 text-base">AI Feedback</CardTitle>
+                      <CardDescription className="text-slate-500 text-xs">Real-time guidance</CardDescription>
                     </div>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="bg-black/40 backdrop-blur-sm rounded-xl p-4 min-h-[120px] border border-white/10">
+                  <div className="bg-slate-50 rounded-xl p-4 min-h-[120px] border border-slate-200">
                     {agentResponse ? (
                       <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         className="flex items-start gap-3"
                       >
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
                           <Sparkles className="w-4 h-4 text-white" />
                         </div>
-                        <p className="text-sm text-white/90 leading-relaxed">{agentResponse}</p>
+                        <p className="text-sm text-slate-700 leading-relaxed">{agentResponse}</p>
                       </motion.div>
                     ) : (
                       <div className="flex flex-col items-center justify-center h-full text-center">
-                        <Sparkles className="w-8 h-8 text-white/20 mb-2" />
-                        <p className="text-sm text-white/40">Start a session to receive AI feedback...</p>
+                        <Sparkles className="w-8 h-8 text-slate-300 mb-2" />
+                        <p className="text-sm text-slate-500">Start a session to receive AI feedback...</p>
                       </div>
                     )}
                   </div>
@@ -479,28 +453,28 @@ export default function LearnPage() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.95 }}
                   >
-                    <Card className="bg-gradient-to-br from-emerald-500/10 to-teal-500/10 backdrop-blur-xl border-emerald-500/30">
+                    <Card className="bg-emerald-50 border-emerald-200 shadow-sm">
                       <CardHeader className="pb-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                            <Activity className="w-4 h-4 text-white" />
+                          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center">
+                            <Sparkles className="w-4 h-4 text-white" />
                           </div>
-                          <CardTitle className="text-white text-base">Session Active</CardTitle>
+                          <CardTitle className="text-emerald-900 text-base">Session Active</CardTitle>
                         </div>
                       </CardHeader>
                       <CardContent>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between">
-                            <span className="text-white/50">Skill:</span>
-                            <span className="text-white font-medium">{skills.find((s) => s.id === selectedSkill)?.name}</span>
+                            <span className="text-emerald-700">Skill:</span>
+                            <span className="text-emerald-900 font-medium">{skills.find((s) => s.id === selectedSkill)?.name}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-white/50">Language:</span>
-                            <span className="text-white font-medium">{languages.find((l) => l.code === language)?.name}</span>
+                            <span className="text-emerald-700">Language:</span>
+                            <span className="text-emerald-900 font-medium">{languages.find((l) => l.code === language)?.name}</span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-white/50">Status:</span>
-                            <span className={`font-medium ${isWsConnected ? 'text-emerald-400' : 'text-white/50'}`}>
+                            <span className="text-emerald-700">Status:</span>
+                            <span className={`font-medium ${isWsConnected ? 'text-emerald-600' : 'text-emerald-400'}`}>
                               {isWsConnected ? 'Connected' : 'Disconnected'}
                             </span>
                           </div>
@@ -512,13 +486,8 @@ export default function LearnPage() {
               </AnimatePresence>
             </motion.div>
           </div>
-        </motion.div>
+        </div>
       </div>
-
-      {/* Noise Texture Overlay */}
-      <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.015] mix-blend-overlay">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
-      </div>
-    </div>
+    </main>
   );
 }

@@ -1,286 +1,248 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Video, Brain, Globe, Zap, Sparkles, Play, ChevronRight, Wand2, Cpu, Layers } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.15, delayChildren: 0.2 }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 30 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] }
-  }
-};
-
-const floatVariants = {
-  animate: {
-    y: [0, -20, 0],
-    transition: { duration: 6, repeat: Infinity, ease: "easeInOut" }
-  }
-};
-
-const glowVariants = {
-  animate: {
-    scale: [1, 1.2, 1],
-    opacity: [0.5, 0.8, 0.5],
-    transition: { duration: 4, repeat: Infinity, ease: "easeInOut" }
-  }
-};
+import { Video, Brain, Globe, Zap, Sparkles, Play, ArrowRight, ChevronRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const heroRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setMounted(true);
-    const handleMouseMove = (e: MouseEvent) => {
-      if (heroRef.current) {
-        const rect = heroRef.current.getBoundingClientRect();
-        setMousePosition({
-          x: (e.clientX - rect.left - rect.width / 2) / 20,
-          y: (e.clientY - rect.top - rect.height / 2) / 20
-        });
-      }
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
   const features = [
     {
       icon: Video,
-      title: 'Real-Time Vision',
-      description: 'AI sees your hands and provides instant feedback on your technique with sub-200ms latency',
-      color: 'from-cyan-400 via-blue-500 to-indigo-600',
-      bgGlow: 'bg-cyan-500/30'
+      title: 'Real-Time Vision AI',
+      description: 'Camera analyzes your technique instantly with sub-200ms response time',
     },
     {
       icon: Brain,
       title: 'Adaptive Learning',
-      description: 'AI adapts to your skill level and learning pace with personalized guidance',
-      color: 'from-violet-400 via-purple-500 to-fuchsia-600',
-      bgGlow: 'bg-purple-500/30'
+      description: 'AI personalizes guidance based on your skill level and progress',
     },
     {
       icon: Globe,
       title: 'Multi-Language',
-      description: 'Learn in Indonesian, English, or Spanish with real-time AI translation',
-      color: 'from-emerald-400 via-teal-500 to-cyan-600',
-      bgGlow: 'bg-emerald-500/30'
+      description: 'Learn in Bahasa Indonesia, English, or Spanish with native AI fluency',
     },
     {
       icon: Zap,
       title: 'Instant Feedback',
-      description: 'Get corrections in under 200ms - faster than human reaction time',
-      color: 'from-amber-400 via-orange-500 to-rose-600',
-      bgGlow: 'bg-orange-500/30'
-    }
+      description: 'Get immediate corrections and tips while you practice',
+    },
   ];
 
   const skills = [
-    { name: 'Cooking', emoji: '🍳', desc: 'Master culinary arts with AI guidance', color: 'from-orange-400 to-red-500' },
-    { name: 'Repair', emoji: '🔧', desc: 'Fix electronics & machinery', color: 'from-blue-400 to-indigo-500' },
-    { name: 'Farming', emoji: '🌱', desc: 'Learn hydroponics & agriculture', color: 'from-green-400 to-emerald-500' },
-    { name: 'Crafts', emoji: '🎨', desc: 'Create batik, woodwork & more', color: 'from-purple-400 to-pink-500' }
+    { name: 'Cooking', emoji: '🍳', desc: 'Culinary arts & traditional recipes' },
+    { name: 'Repair', emoji: '🔧', desc: 'Electronics & machinery maintenance' },
+    { name: 'Farming', emoji: '🌱', desc: 'Hydroponics & modern agriculture' },
+    { name: 'Crafts', emoji: '🎨', desc: 'Batik, woodwork & handmade goods' },
   ];
 
+  if (!mounted) return null;
+
   return (
-    <main className="min-h-screen bg-[#0a0a0f] text-white overflow-hidden relative">
-      {/* Animated Mesh Gradient Background */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/40 via-[#0a0a0f] to-[#0a0a0f]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,_rgba(99,102,241,0.15)_0%,_transparent_50%)]" />
-        <motion.div 
-          className="absolute top-1/4 left-1/4 w-[800px] h-[800px] bg-gradient-to-r from-violet-600/20 to-fuchsia-600/20 rounded-full blur-[120px]"
-          variants={floatVariants}
-          animate="animate"
-        />
-        <motion.div 
-          className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-gradient-to-r from-cyan-600/20 to-blue-600/20 rounded-full blur-[100px]"
-          variants={floatVariants}
-          animate="animate"
-          style={{ animationDelay: '2s' }}
-        />
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.03%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-50" />
-      </div>
-
-      {/* Floating Orbs */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        {[...Array(5)].map((_, i) => (
-          <motion.div
-            key={i}
-            className="absolute w-64 h-64 rounded-full"
-            style={{
-              background: `radial-gradient(circle, rgba(${99 + i * 20},${102 + i * 10},${241 - i * 30},0.3) 0%, transparent 70%)`,
-              left: `${15 + i * 18}%`,
-              top: `${20 + i * 12}%`,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              x: [0, 15, 0],
-              scale: [1, 1.1, 1],
-            }}
-            transition={{
-              duration: 8 + i * 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-              delay: i * 0.5
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Grid Lines */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:100px_100px]" />
-      </div>
-
-      <div className="container mx-auto px-4 py-16 relative z-10">
-        {/* Hero Section */}
-        <motion.div 
-          ref={heroRef}
-          className="text-center mb-24 pt-8"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {/* Badge */}
-          <motion.div variants={itemVariants} className="mb-8">
-            <div className="inline-flex items-center gap-3 px-5 py-2.5 rounded-full bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-xl border border-white/20 shadow-[0_0_40px_rgba(99,102,241,0.3)]">
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-              >
-                <Sparkles className="w-5 h-5 text-amber-400" />
-              </motion.div>
-              <span className="text-sm font-medium bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
-                Gemini Live Agent Challenge 2026
-              </span>
-              <div className="flex gap-1">
-                <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-              </div>
+    <main className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-4 h-4 text-white" />
             </div>
-          </motion.div>
-
-          {/* Main Title */}
-          <motion.div variants={itemVariants} className="mb-8 relative">
-            <motion.h1 
-              className="text-7xl md:text-8xl lg:text-9xl font-black tracking-tight mb-4"
-              style={{
-                transform: `perspective(1000px) rotateX(${mousePosition.y}deg) rotateY(${mousePosition.x}deg)`,
-                transition: 'transform 0.1s ease-out'
-              }}
-            >
-              <span className="bg-gradient-to-r from-white via-indigo-200 to-white bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(99,102,241,0.5)]">
-                HandsOnLive
-              </span>
-            </motion.h1>
-            <motion.div
-              className="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 blur-3xl -z-10"
-              variants={glowVariants}
-              animate="animate"
-            />
-          </motion.div>
-
-          {/* Subtitle */}
-          <motion.p 
-            variants={itemVariants}
-            className="text-3xl md:text-4xl font-light mb-6 bg-gradient-to-r from-indigo-300 via-purple-300 to-pink-300 bg-clip-text text-transparent"
-          >
-            Real-Time Vision AI Skills Mentor
-          </motion.p>
-
-          <motion.p 
-            variants={itemVariants}
-            className="text-xl text-white/60 max-w-3xl mx-auto mb-12 leading-relaxed"
-          >
-            Transform your smartphone into a personal AI coach. Learn practical skills 
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-400 font-semibold"> with instant feedback </span>
-            powered by Gemini Live API.
-          </motion.p>
-
-          {/* CTA Buttons */}
-          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <span className="font-bold text-slate-900 text-lg">HandsOnLive</span>
+          </div>
+          <div className="flex items-center gap-6">
+            <Link href="/about" className="text-slate-600 hover:text-slate-900 transition-colors text-sm font-medium">
+              About
+            </Link>
+            <Link href="/dashboard" className="text-slate-600 hover:text-slate-900 transition-colors text-sm font-medium">
+              Dashboard
+            </Link>
             <Link href="/learn">
-              <Button 
-                size="lg" 
-                className="group relative px-10 py-7 text-lg font-semibold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 hover:from-indigo-500 hover:via-purple-500 hover:to-pink-500 border-0 overflow-hidden shadow-[0_0_40px_rgba(99,102,241,0.5)] hover:shadow-[0_0_60px_rgba(99,102,241,0.7)] transition-all duration-300"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
-                <Play className="w-5 h-5 mr-3 group-hover:scale-110 transition-transform" />
+              <Button className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-5">
                 Start Learning
               </Button>
             </Link>
-            <Link href="/about">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="px-10 py-7 text-lg font-medium bg-white/5 backdrop-blur-xl border-white/20 hover:bg-white/10 hover:border-white/30 transition-all group"
-              >
-                Explore Features
-                <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
+      </nav>
 
-        {/* Features Grid */}
-        <motion.div 
-          className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-        >
-          {features.map((feature, index) => (
-            <motion.div key={index} variants={itemVariants}>
-              <Card className="group relative h-full bg-white/[0.03] backdrop-blur-xl border-white/10 hover:border-white/20 hover:bg-white/[0.05] transition-all duration-500 overflow-hidden">
-                <div className={`absolute inset-0 ${feature.bgGlow} opacity-0 group-hover:opacity-100 blur-3xl transition-opacity duration-500`} />
-                <CardHeader className="relative z-10">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-5 shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-                    <feature.icon className="w-7 h-7 text-white" />
-                  </div>
-                  <CardTitle className="text-xl text-white/90 group-hover:text-white transition-colors">
-                    {feature.title}
-                  </CardTitle>
-                  <CardDescription className="text-white/50 group-hover:text-white/70 transition-colors leading-relaxed">
-                    {feature.description}
-                  </CardDescription>
-                </CardHeader>
-              </Card>
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            {/* Left Content */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6 }}
+            >
+              <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 border border-indigo-100 rounded-full mb-6">
+                <span className="w-2 h-2 bg-indigo-600 rounded-full animate-pulse" />
+                <span className="text-indigo-700 text-sm font-medium">Gemini Live Agent Challenge 2026</span>
+              </div>
+
+              <h1 className="text-5xl lg:text-6xl font-bold text-slate-900 leading-tight mb-6">
+                Learn Real Skills with{' '}
+                <span className="text-indigo-600">AI Vision</span>
+              </h1>
+
+              <p className="text-lg text-slate-600 leading-relaxed mb-8 max-w-lg">
+                Transform your smartphone into a personal AI coach. Get instant feedback on cooking, 
+                repairs, farming, and crafts powered by Gemini Live API.
+              </p>
+
+              <div className="flex flex-wrap gap-4">
+                <Link href="/learn">
+                  <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-8 h-14 text-base font-semibold group">
+                    <Play className="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" />
+                    Start Learning Now
+                  </Button>
+                </Link>
+                <Link href="/about">
+                  <Button size="lg" variant="outline" className="rounded-full px-8 h-14 text-base font-semibold border-slate-300 hover:bg-slate-50">
+                    Learn More
+                    <ArrowRight className="w-5 h-5 ml-2" />
+                  </Button>
+                </Link>
+              </div>
+
+              {/* Stats */}
+              <div className="flex gap-8 mt-12 pt-8 border-t border-slate-200">
+                <div>
+                  <div className="text-3xl font-bold text-slate-900">&lt;200ms</div>
+                  <div className="text-sm text-slate-500">Response Time</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-slate-900">4</div>
+                  <div className="text-sm text-slate-500">Skills Available</div>
+                </div>
+                <div>
+                  <div className="text-3xl font-bold text-slate-900">3</div>
+                  <div className="text-sm text-slate-500">Languages</div>
+                </div>
+              </div>
             </motion.div>
-          ))}
-        </motion.div>
 
-        {/* Skills Section */}
-        <motion.div 
-          className="mb-24"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-          variants={containerVariants}
-        >
-          <motion.div variants={itemVariants} className="text-center mb-12">
-            <h2 className="text-5xl md:text-6xl font-bold mb-4">
-              <span className="bg-gradient-to-r from-white via-indigo-200 to-purple-200 bg-clip-text text-transparent">
-                Master New Skills
-              </span>
+            {/* Right - Phone Mockup */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative"
+            >
+              <div className="relative mx-auto w-[280px] h-[580px] bg-slate-900 rounded-[3rem] p-3 shadow-2xl shadow-indigo-500/20">
+                <div className="w-full h-full bg-gradient-to-br from-slate-800 to-slate-900 rounded-[2.5rem] overflow-hidden relative">
+                  {/* Screen Content */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-indigo-600/20 to-purple-600/20" />
+                  
+                  {/* Mock Video Feed */}
+                  <div className="absolute top-12 left-4 right-4 aspect-video bg-slate-700 rounded-2xl overflow-hidden">
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-600 to-slate-700" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <Video className="w-8 h-8 text-slate-500" />
+                    </div>
+                    <div className="absolute top-2 right-2 px-2 py-1 bg-red-500 rounded-md flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+                      <span className="text-white text-[10px] font-medium">LIVE</span>
+                    </div>
+                  </div>
+
+                  {/* AI Feedback Bubble */}
+                  <div className="absolute bottom-24 left-4 right-4 bg-white/95 backdrop-blur rounded-2xl p-4 shadow-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="w-8 h-8 bg-indigo-600 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Sparkles className="w-4 h-4 text-white" />
+                      </div>
+                      <div>
+                        <div className="text-sm font-semibold text-slate-900 mb-1">AI Coach</div>
+                        <div className="text-xs text-slate-600">Great cutting technique! Try to keep your fingers tucked for safety.</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Controls */}
+                  <div className="absolute bottom-6 left-4 right-4 flex justify-center gap-4">
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Video className="w-5 h-5 text-white" />
+                    </div>
+                    <div className="w-14 h-14 bg-red-500 rounded-full flex items-center justify-center">
+                      <div className="w-6 h-6 bg-white rounded-sm" />
+                    </div>
+                    <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                      <Zap className="w-5 h-5 text-white" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Decorative Elements */}
+              <div className="absolute -top-4 -right-4 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl" />
+              <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-purple-500/10 rounded-full blur-xl" />
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 bg-slate-50">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+              Powered by Advanced AI
             </h2>
-            <p className="text-xl text-white/50 max-w-2xl mx-auto">
-              Choose from our curated collection of practical skills powered by AI
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Experience the future of skill learning with real-time AI vision technology
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {features.map((feature, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="bg-white rounded-2xl p-6 border border-slate-200 hover:border-indigo-300 hover:shadow-lg hover:shadow-indigo-500/10 transition-all group"
+              >
+                <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-600 transition-colors">
+                  <feature.icon className="w-6 h-6 text-indigo-600 group-hover:text-white transition-colors" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">{feature.title}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed">{feature.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Skills Section */}
+      <section className="py-20">
+        <div className="max-w-7xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
+              Learn Practical Skills
+            </h2>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              Choose from our curated collection of hands-on skills with AI-powered guidance
             </p>
           </motion.div>
 
@@ -288,85 +250,79 @@ export default function Home() {
             {skills.map((skill, index) => (
               <motion.div
                 key={index}
-                variants={itemVariants}
-                whileHover={{ y: -8, scale: 1.02 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className="group cursor-pointer"
               >
-                <Card className="group relative h-full bg-gradient-to-br from-white/[0.05] to-white/[0.02] backdrop-blur-xl border-white/10 hover:border-white/20 overflow-hidden cursor-pointer">
-                  <div className={`absolute inset-0 bg-gradient-to-br ${skill.color} opacity-0 group-hover:opacity-10 transition-opacity duration-500`} />
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-white/10 to-transparent rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  <CardHeader className="relative z-10">
-                    <div className="text-5xl mb-4 group-hover:scale-110 group-hover:rotate-6 transition-transform duration-300">
-                      {skill.emoji}
-                    </div>
-                    <CardTitle className="text-2xl text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-indigo-200 transition-all">
-                      {skill.name}
-                    </CardTitle>
-                    <CardDescription className="text-white/50 group-hover:text-white/70">
-                      {skill.desc}
-                    </CardDescription>
-                  </CardHeader>
-                </Card>
+                <div className="bg-white rounded-2xl p-6 border border-slate-200 hover:border-indigo-300 hover:shadow-xl transition-all h-full">
+                  <div className="text-4xl mb-4">{skill.emoji}</div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-indigo-600 transition-colors">
+                    {skill.name}
+                  </h3>
+                  <p className="text-sm text-slate-600">{skill.desc}</p>
+                  <div className="mt-4 flex items-center text-indigo-600 text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                    Start Learning
+                    <ChevronRight className="w-4 h-4 ml-1" />
+                  </div>
+                </div>
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </div>
+      </section>
 
-        {/* Stats Section */}
-        <motion.div 
-          className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-24"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={containerVariants}
-        >
-          {[
-            { value: '<200ms', label: 'Response Time', icon: Zap },
-            { value: '99.9%', label: 'Uptime', icon: Cpu },
-            { value: '4', label: 'Languages', icon: Globe },
-            { value: '50M+', label: 'Target Users', icon: Layers }
-          ].map((stat, index) => (
-            <motion.div
-              key={index}
-              variants={itemVariants}
-              className="text-center p-6 rounded-2xl bg-white/[0.02] backdrop-blur-xl border border-white/10"
-            >
-              <stat.icon className="w-6 h-6 text-indigo-400 mx-auto mb-3" />
-              <div className="text-3xl md:text-4xl font-black bg-gradient-to-r from-white to-indigo-200 bg-clip-text text-transparent mb-1">
-                {stat.value}
+      {/* CTA Section */}
+      <section className="py-20 bg-slate-900">
+        <div className="max-w-4xl mx-auto px-6 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              Ready to Start Learning?
+            </h2>
+            <p className="text-lg text-slate-400 mb-8 max-w-2xl mx-auto">
+              Join thousands of learners mastering real-world skills with AI guidance. 
+              No expensive equipment needed—just your smartphone.
+            </p>
+            <Link href="/learn">
+              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 rounded-full px-10 h-14 text-base font-semibold">
+                <Sparkles className="w-5 h-5 mr-2" />
+                Get Started for Free
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 bg-white border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 bg-indigo-600 rounded-md flex items-center justify-center">
+                <Sparkles className="w-3 h-3 text-white" />
               </div>
-              <div className="text-sm text-white/50">{stat.label}</div>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Footer */}
-        <motion.div 
-          className="text-center pt-12 border-t border-white/10"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-        >
-          <div className="inline-flex items-center gap-4 px-8 py-4 rounded-full bg-white/[0.03] backdrop-blur-xl border border-white/10">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-            >
-              <Wand2 className="w-5 h-5 text-purple-400" />
-            </motion.div>
-            <span className="text-white/70">
-              Built for <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-purple-400 font-semibold">Gemini Live Agent Challenge 2026</span>
-            </span>
-            <span className="text-white/30">|</span>
-            <span className="text-white/70">Powered by <span className="text-blue-400 font-semibold">Google Cloud</span></span>
+              <span className="font-semibold text-slate-900">HandsOnLive</span>
+            </div>
+            <div className="text-sm text-slate-500">
+              Built for Gemini Live Agent Challenge 2026 • Powered by Google Cloud
+            </div>
+            <div className="flex items-center gap-6">
+              <Link href="/about" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
+                About
+              </Link>
+              <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-900 transition-colors">
+                Dashboard
+              </Link>
+            </div>
           </div>
-        </motion.div>
-      </div>
-
-      {/* Noise Texture Overlay */}
-      <div className="fixed inset-0 z-[100] pointer-events-none opacity-[0.015] mix-blend-overlay">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E')]" />
-      </div>
+        </div>
+      </footer>
     </main>
   );
 }
