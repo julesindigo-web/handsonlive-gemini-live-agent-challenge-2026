@@ -4,7 +4,14 @@ import { logger } from '../utils/logger';
 import { AppError } from '../utils/error-handler';
 
 export const geminiLiveRouter = Router();
-const geminiLiveService = new GeminiLiveService();
+let geminiLiveService: GeminiLiveService | null = null;
+
+function getService() {
+  if (!geminiLiveService) {
+    geminiLiveService = new GeminiLiveService();
+  }
+  return geminiLiveService;
+}
 
 geminiLiveRouter.post('/session/start', async (req, res, next) => {
   try {
@@ -14,7 +21,8 @@ geminiLiveRouter.post('/session/start', async (req, res, next) => {
       throw new AppError(400, 'userId and skill are required');
     }
 
-    const session = await geminiLiveService.startSession(userId, skill, language);
+    const service = getService();
+    const session = await service.startSession(userId, skill, language);
 
     logger.info('Gemini Live session started', { userId, skill, sessionId: session.id });
 
@@ -31,7 +39,8 @@ geminiLiveRouter.post('/session/:sessionId/stop', async (req, res, next) => {
   try {
     const { sessionId } = req.params;
 
-    await geminiLiveService.stopSession(sessionId);
+    const service = getService();
+    await service.stopSession(sessionId);
 
     logger.info('Gemini Live session stopped', { sessionId });
 
@@ -48,7 +57,8 @@ geminiLiveRouter.get('/session/:sessionId/status', async (req, res, next) => {
   try {
     const { sessionId } = req.params;
 
-    const status = await geminiLiveService.getSessionStatus(sessionId);
+    const service = getService();
+    const status = await service.getSessionStatus(sessionId);
 
     res.json({
       status: 'success',
@@ -67,7 +77,8 @@ geminiLiveRouter.post('/feedback', async (req, res, next) => {
       throw new AppError(400, 'sessionId and feedback are required');
     }
 
-    await geminiLiveService.submitFeedback(sessionId, feedback);
+    const service = getService();
+    await service.submitFeedback(sessionId, feedback);
 
     res.json({
       status: 'success',
