@@ -1,0 +1,104 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        project: [backend, frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.project }}
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./${{ matrix.project }}
+        run: npm run lint
+
+      - name: Run Prettier check
+        working-directory: ./${{ matrix.project }}
+        run: npm run format:check
+
+  type-check:
+    name: Type Check
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        project: [backend, frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install dependencies
+        working-directory: ./${{ matrix.project }}
+        run: npm ci
+
+      - name: Run TypeScript check
+        working-directory: ./${{ matrix.project }}
+        run: npm run type-check
+
+  format:
+    name: Format Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Prettier
+        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,md,yml,yaml}"
+
+  complexity:
+    name: Code Complexity
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run complexity check
+        run: |
+          npx eslint --ext .ts,.tsx,.js,.jsx --format json --output-file eslint-report.json . || true
+          node scripts/check-complexity.js
+
+  duplicate-code:
+    name: Duplicate Code Detection
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run jscpd
+        run: |
+          npx jscpd . --threshold 10 --reporters html json
+
+      - name: Upload jscpd report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jscpd-report
+          path: report/jscpd-report.html
