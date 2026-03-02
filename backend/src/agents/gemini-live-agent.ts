@@ -2,6 +2,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { logger } from '../utils/logger';
 import { RAGService } from '../services/rag-service';
 import { AgentMemoryService } from '../services/agent-memory-service';
+import { ToolCallingService } from '../services/tool-calling-service';
 
 export interface LiveAgentConfig {
   apiKey: string;
@@ -32,6 +33,7 @@ export class GeminiLiveAgent {
   private ragService: RAGService;
   private sessionHistory: any[] = [];
   private memoryService: AgentMemoryService | undefined;
+  private toolCallingService: ToolCallingService;
 
   constructor(
     private skill: string,
@@ -50,6 +52,7 @@ export class GeminiLiveAgent {
 
     this.ragService = ragService || new RAGService();
     this.memoryService = memoryService;
+    this.toolCallingService = new ToolCallingService();
   }
 
   async startSession(userId: string, skill: string, language: string): Promise<void> {
@@ -250,5 +253,13 @@ Remember:
     };
 
     return { text: responses[type] || 'Demo response' };
+  }
+
+  async executeToolCall(toolCall: { name: string; parameters: any }): Promise<any> {
+    return this.toolCallingService.callTool(toolCall);
+  }
+
+  getAvailableTools(): string[] {
+    return this.toolCallingService.getAvailableTools();
   }
 }
